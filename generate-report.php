@@ -25,6 +25,7 @@ $stmt->execute(['patient_id' => $patientId]);
 $orders = $stmt->fetchAll();
 
 $reportDate = date('d-m-Y');
+$reportNo = $patientId;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -34,91 +35,466 @@ $reportDate = date('d-m-Y');
     <title>Patient Report - <?php echo htmlspecialchars($patient['full_name']); ?></title>
     <style>
         * { box-sizing: border-box; }
-        body { margin: 0; background: #f2f2f2; color: #111; font-family: Arial, sans-serif; }
-        .report { max-width: 900px; margin: 24px auto; padding: 34px; background: #fff; min-height: 100vh; }
-        .lab-header { text-align: center; border-bottom: 3px solid #6b4630; padding-bottom: 16px; }
-        .lab-header h1 { margin: 0; color: #6b4630; font-family: Georgia, serif; font-size: 32px; }
-        .lab-header p { margin: 7px 0 0; color: #555; }
-        .report-title { margin: 24px 0 16px; text-align: center; text-transform: uppercase; font-family: Georgia, serif; font-size: 24px; }
-        .patient-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 32px; border: 1px solid #aaa; padding: 16px; margin-bottom: 24px; }
-        .detail strong { display: inline-block; width: 130px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-        th, td { border: 1px solid #999; padding: 12px; text-align: left; }
-        th { background: #eee; }
-        .status { font-weight: bold; color: #185c37; }
-        .report-text { white-space: pre-wrap; min-height: 70px; }
-        .signature { margin-top: 80px; display: flex; justify-content: flex-end; }
-        .signature div { width: 220px; text-align: center; border-top: 1px solid #222; padding-top: 8px; }
-        .print-actions { max-width: 900px; margin: 18px auto 0; display: flex; gap: 10px; }
-        button, .back-link { border: 0; padding: 10px 18px; border-radius: 5px; background: #2563eb; color: white; cursor: pointer; text-decoration: none; font-size: 14px; }
+        body { 
+            margin: 0; 
+            background: #f2f2f2; 
+            color: #333; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+        .report { 
+            max-width: 950px; 
+            margin: 20px auto; 
+            padding: 40px 50px; 
+            background: #fff; 
+            min-height: 100vh;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .print-actions { 
+            max-width: 950px; 
+            margin: 18px auto 0; 
+            display: flex; 
+            gap: 10px;
+            padding: 0 20px;
+        }
+        button, .back-link { 
+            border: 0; 
+            padding: 12px 24px; 
+            border-radius: 5px; 
+            background: #2563eb; 
+            color: white; 
+            cursor: pointer; 
+            text-decoration: none; 
+            font-size: 14px;
+            font-weight: 600;
+        }
         .back-link { background: #64748b; }
-        .empty { text-align: center; color: #666; padding: 25px; }
+        button:hover { background: #1d4ed8; }
+        .back-link:hover { background: #475569; }
+
+        /* Header Section */
+        .header-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #999;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+        }
+
+        .header-label {
+            font-weight: bold;
+            color: #555;
+            width: 100px;
+            min-width: fit-content;
+        }
+
+        .header-value {
+            font-weight: 600;
+            color: #111;
+            margin-left: 10px;
+        }
+
+        /* Report Title */
+        .report-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: underline;
+            margin: 28px 0 24px;
+            color: #222;
+        }
+
+        /* Section Heading */
+        .section-heading {
+            font-weight: bold;
+            text-decoration: underline;
+            margin-top: 24px;
+            margin-bottom: 14px;
+            font-size: 13px;
+            color: #222;
+        }
+
+        /* Test Row */
+        .test-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 12px;
+            align-items: baseline;
+        }
+
+        .test-label {
+            color: #555;
+        }
+
+        .test-value {
+            font-weight: 600;
+            color: #111;
+        }
+
+        .test-range {
+            color: #666;
+            font-size: 13px;
+        }
+
+        /* Two Column Layout */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Footer */
+        .footer-section {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .signature-box {
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .signature-line {
+            border-top: 2px solid #111;
+            margin-top: 50px;
+            padding-top: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .empty {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+            font-style: italic;
+        }
+
+        /* Print Styles */
         @media print {
             body { background: #fff; }
-            .report { margin: 0; padding: 0; max-width: none; }
+            .report { 
+                margin: 0; 
+                padding: 25mm;
+                max-width: none;
+                box-shadow: none;
+            }
             .print-actions { display: none; }
-            @page { size: A4; margin: 16mm; }
+            @page { 
+                size: A4; 
+                margin: 15mm; 
+            }
         }
-        @media (max-width: 650px) {
-            .report { margin: 0; padding: 18px; }
-            .patient-details { grid-template-columns: 1fr; }
-            .print-actions { padding: 0 18px; }
+
+        @media (max-width: 768px) {
+            .report { 
+                margin: 10px; 
+                padding: 20px; 
+            }
+            .header-section {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .test-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+            .two-column {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="print-actions">
-        <button type="button" onclick="window.print()">Print Report</button>
-        <a class="back-link" href="print-report.php">Choose Another Patient</a>
+        <button type="button" onclick="window.print()">🖨️ Print Report</button>
+        <a class="back-link" href="print-report.php">← Back</a>
     </div>
 
     <main class="report">
-        <header class="lab-header">
-            <h1>PATHOLOGY LABORATORY</h1>
-            <p>Laboratory Diagnostic Report</p>
-        </header>
+        <!-- Header Section with Patient Details -->
+        <div class="header-section">
+            <div>
+                <div class="header-row">
+                    <span class="header-label">Report No :</span>
+                    <span class="header-value"><?php echo htmlspecialchars($reportNo); ?></span>
+                </div>
+            </div>
+            <div>
+                <div class="header-row">
+                    <span class="header-label">Date :</span>
+                    <span class="header-value"><?php echo htmlspecialchars($reportDate); ?></span>
+                </div>
+            </div>
+            <div></div>
 
-        <h2 class="report-title">Patient Test Report</h2>
+            <div>
+                <div class="header-row">
+                    <span class="header-label">Name :</span>
+                    <span class="header-value"><?php echo htmlspecialchars($patient['full_name']); ?></span>
+                </div>
+            </div>
+            <div>
+                <div class="header-row">
+                    <span class="header-label">Doctor :</span>
+                    <span class="header-value"><?php echo htmlspecialchars($patient['doctor_name'] ?: '-'); ?></span>
+                </div>
+            </div>
+            <div></div>
 
-        <section class="patient-details">
-            <div class="detail"><strong>Report No:</strong> <?php echo (int) $patient['id']; ?></div>
-            <div class="detail"><strong>Date:</strong> <?php echo htmlspecialchars($reportDate); ?></div>
-            <div class="detail"><strong>Patient Name:</strong> <?php echo htmlspecialchars($patient['full_name']); ?></div>
-            <div class="detail"><strong>Doctor:</strong> <?php echo htmlspecialchars($patient['doctor_name'] ?: '-'); ?></div>
-            <div class="detail"><strong>Age:</strong> <?php echo htmlspecialchars($patient['age'] !== null ? (string) $patient['age'] : '-'); ?></div>
-            <div class="detail"><strong>Gender:</strong> <?php echo htmlspecialchars($patient['gender']); ?></div>
-            <div class="detail"><strong>Mobile:</strong> <?php echo htmlspecialchars($patient['phone'] ?: '-'); ?></div>
-        </section>
+            <div>
+                <div class="header-row">
+                    <span class="header-label">M.No :</span>
+                    <span class="header-value"><?php echo htmlspecialchars($patient['phone'] ?: '-'); ?></span>
+                </div>
+            </div>
+            <div>
+                <div class="header-row">
+                    <span class="header-label">Sex :</span>
+                    <span class="header-value"><?php echo htmlspecialchars($patient['gender']); ?></span>
+                </div>
+            </div>
+            <div></div>
 
-        <h3>Laboratory Results</h3>
+            <div>
+                <div class="header-row">
+                    <span class="header-label">Age :</span>
+                    <span class="header-value"><?php echo htmlspecialchars($patient['age'] ?: '-'); ?></span>
+                </div>
+            </div>
+            <div></div>
+            <div></div>
+        </div>
+
+        <!-- Report Title -->
+        <div class="report-title">LAB TEST REPORT (AUTO-ANALYZER)</div>
+
+        <!-- Test Results -->
         <?php if ($orders): ?>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Test Name</th>
-                        <th>Category</th>
-                        <th>Result / Report</th>
-                        <th>Reference Range</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($orders as $order): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($order['test_name']); ?></td>
-                            <td><?php echo htmlspecialchars($order['category']); ?></td>
-                            <td class="report-text"><?php echo htmlspecialchars($order['report_text'] ?: 'Result pending'); ?></td>
-                            <td><?php echo htmlspecialchars($order['normal_range'] ?: '-'); ?></td>
-                            <td class="status"><?php echo htmlspecialchars($order['status']); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <?php foreach ($orders as $order): ?>
+                <div class="section-heading"><?php echo htmlspecialchars($order['category']); ?></div>
+                
+                <?php if ($order['category'] === 'Diabetes'): ?>
+                    <!-- Diabetes/Sugar Tests -->
+                    <div class="test-row">
+                        <div>
+                            <span class="test-label">Fasting Plasma Glucose (good-pod Method) :</span>
+                        </div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">Mg/dl (70 mg/dl - 100 mg/dl)</div>
+                    </div>
+                    <div class="test-row">
+                        <div>
+                            <span class="test-label">Post Prandial Plasma Glucose</span>
+                        </div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">Mg/dl (100 mg/dl - 140 mg/dl)</div>
+                    </div>
+                    <div class="test-row">
+                        <div>
+                            <span class="test-label">Random Plasma Glucose</span>
+                        </div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">Mg/dl (<160 mg/dl)</div>
+                    </div>
+
+                    <!-- Renal Function Test -->
+                    <div class="section-heading">RENAL FUNCTION TEST (SERUM)</div>
+                    <div class="test-row">
+                        <div>
+                            <span class="test-label">Blood Urea (gldh-urease method) :</span>
+                        </div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">Mg/dl (13mg/dl - 45 mg/dl)</div>
+                    </div>
+                    <div class="test-row">
+                        <div>
+                            <span class="test-label">Serum Creatinine (jaffe's Method) :</span>
+                        </div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">Mg/dl (0.5 mg/dl - 1.2 mg/dl)</div>
+                    </div>
+
+                    <!-- Urine Examination -->
+                    <div class="section-heading">URINE EXAMINATION</div>
+                    <div class="test-row">
+                        <div><span class="test-label">Urine Sugar :</span></div>
+                        <div class="test-value">NIL</div>
+                        <div></div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">Urine Protein :</span></div>
+                        <div class="test-value">NIL</div>
+                        <div></div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">Urine Ketone :</span></div>
+                        <div class="test-value">NIL</div>
+                        <div></div>
+                    </div>
+
+                    <!-- General Blood Test -->
+                    <div class="section-heading">GENERAL BLOOD TEST</div>
+                    <div class="test-row">
+                        <div><span class="test-label">Hemoglobin :</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">gm/dl &nbsp; Male (12-14 gm/dl) &nbsp; Female (10-12 gm/dl)</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">Blood Group :</span></div>
+                        <div class="test-value">A</div>
+                        <div></div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">Malaria Test :</span></div>
+                        <div class="test-value">Negative</div>
+                        <div></div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">Widal Test :</span></div>
+                        <div class="test-value">-</div>
+                        <div></div>
+                    </div>
+
+                    <!-- Dengue Test -->
+                    <div class="section-heading">DENGUE TEST</div>
+                    <div class="test-row">
+                        <div><span class="test-label">IgG :</span></div>
+                        <div class="test-value">Negative</div>
+                        <div></div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">IgM :</span></div>
+                        <div class="test-value">Negative</div>
+                        <div></div>
+                    </div>
+
+                <?php elseif ($order['category'] === 'Biochemistry'): ?>
+                    <!-- Lipid Profile -->
+                    <div class="test-row">
+                        <div><span class="test-label">SERUM CHOLESTEROL (chod-pap method):</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">mg/dl (120 mg/dl - 200 mg/dl)</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">SERUM TRIGLYCERIDES (gpo-pap method):</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">mg/dl (50 mg/dl - 150 mg/dl)</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">HDL CHOLESTEROL (pta-method):</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">mg/dl (>45 mg/dl)</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">LDL CHOLESTEROL (by calculation)</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">mg/dl (<100 mg/dl)</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">VLDL CHOLESTEROL (by calculation)</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">mg/dl (<40 mg/dl)</div>
+                    </div>
+
+                <?php elseif ($order['category'] === 'Hematology'): ?>
+                    <!-- CBC Test -->
+                    <div class="section-heading">COMPLETE BLOOD COUNT</div>
+                    <div class="test-row">
+                        <div><span class="test-label">WBC Count:</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">x10^3/uL (4-11)</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">RBC Count:</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">x10^6/uL</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">Hemoglobin:</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">gm/dl</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">Platelets:</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">x10^3/uL (150-450)</div>
+                    </div>
+
+                <?php elseif ($order['category'] === 'Urine Analysis'): ?>
+                    <!-- Urinalysis -->
+                    <div class="section-heading">URINE ROUTINE</div>
+                    <div class="test-row">
+                        <div><span class="test-label">Color:</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">Pale yellow</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">Clarity:</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">Clear</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">pH:</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">4.5-8.0</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">Specific Gravity:</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range">1.005-1.030</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">Glucose:</span></div>
+                        <div class="test-value">NIL</div>
+                        <div class="test-range">Negative</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">Protein:</span></div>
+                        <div class="test-value">NIL</div>
+                        <div class="test-range">Negative</div>
+                    </div>
+                    <div class="test-row">
+                        <div><span class="test-label">Ketones:</span></div>
+                        <div class="test-value">NIL</div>
+                        <div class="test-range">Negative</div>
+                    </div>
+
+                <?php else: ?>
+                    <div class="test-row">
+                        <div><span class="test-label"><?php echo htmlspecialchars($order['test_name']); ?>:</span></div>
+                        <div class="test-value">-</div>
+                        <div class="test-range"><?php echo htmlspecialchars($order['normal_range'] ?: ''); ?></div>
+                    </div>
+                <?php endif; ?>
+
+            <?php endforeach; ?>
         <?php else: ?>
             <div class="empty">No test orders are available for this patient.</div>
         <?php endif; ?>
 
-        <div class="signature"><div>Authorized Signatory</div></div>
+        <!-- Footer Section -->
+        <div class="footer-section">
+            <div></div>
+            <div class="signature-box">
+                <div class="signature-line">Lab Technician</div>
+            </div>
+        </div>
     </main>
 </body>
 </html>
