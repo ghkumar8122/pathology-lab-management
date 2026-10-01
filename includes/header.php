@@ -18,10 +18,16 @@
             </div>
             <nav>
                 <a href="dashboard.php" class="nav-link">Dashboard</a>
+                <a href="sugar-test.php" class="nav-link">Sugar test</a>
+                <a href="lipid-profile-test.php" class="nav-link">Lipid profile test</a>
+                <a href="liver-function-test.php" class="nav-link">Liver function test (LFT)</a>
+                <a href="hba1c-test.php" class="nav-link">Hb1 A1C Test</a>
+                <a href="urinalysis-test.php" class="nav-link">Urinalysis Test</a>
+                <a href="packages.php" class="nav-link">Packages</a>
+                <a href="reports.php" class="nav-link">Reports</a>
                 <a href="patients.php" class="nav-link">Patients</a>
                 <a href="tests.php" class="nav-link">Lab Tests</a>
                 <a href="orders.php" class="nav-link">Orders</a>
-                <a href="reports.php" class="nav-link">Reports</a>
                 <a href="billing.php" class="nav-link">Billing</a>
                 <a href="logout.php" class="nav-link danger">Logout</a>
             </nav>
