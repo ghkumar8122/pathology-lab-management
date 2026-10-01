@@ -110,17 +110,26 @@ include __DIR__ . '/includes/header.php';
 
         <div class="form-group">
             <label>Fasting Plasma Glucose (god-pod Method)</label>
-            <input type="text" name="fasting_plasma_glucose" placeholder="mg/dl (70-100)">
+            <div class="input-with-note">
+                <input type="text" name="fasting_plasma_glucose" placeholder="Enter value">
+                <span class="note">Mg/dl (70-100)</span>
+            </div>
         </div>
 
         <div class="form-group">
             <label>Post Prandial Plasma</label>
-            <input type="text" name="post_prandial_plasma" placeholder="mg/dl (100-140)">
+            <div class="input-with-note">
+                <input type="text" name="post_prandial_plasma" placeholder="Enter value">
+                <span class="note">Mg/dl (100-140)</span>
+            </div>
         </div>
 
         <div class="form-group">
             <label>Random Plasma Glucose</label>
-            <input type="text" name="random_plasma_glucose" placeholder="mg/dl (<160)">
+            <div class="input-with-note">
+                <input type="text" name="random_plasma_glucose" placeholder="Enter value">
+                <span class="note">Mg/dl (<160)</span>
+            </div>
         </div>
 
         <!-- Renal Function Tests -->
@@ -130,12 +139,18 @@ include __DIR__ . '/includes/header.php';
 
         <div class="form-group">
             <label>Blood Urea (gldh-urease method)</label>
-            <input type="text" name="blood_urea" placeholder="mg/dl (13-45)">
+            <div class="input-with-note">
+                <input type="text" name="blood_urea" placeholder="Enter value">
+                <span class="note">Mg/dl (13-45)</span>
+            </div>
         </div>
 
         <div class="form-group">
             <label>Serum Creatinine (jaffe's Method)</label>
-            <input type="text" name="serum_creatinine" placeholder="mg/dl (0.5-1.2)">
+            <div class="input-with-note">
+                <input type="text" name="serum_creatinine" placeholder="Enter value">
+                <span class="note">Mg/dl (0.5-1.2)</span>
+            </div>
         </div>
 
         <!-- Urine Examination -->
@@ -186,7 +201,10 @@ include __DIR__ . '/includes/header.php';
 
         <div class="form-group">
             <label>Hemoglobin</label>
-            <input type="text" name="hemoglobin" placeholder="gm/dl (12-14 Male, 10-12 Female)">
+            <div class="input-with-note">
+                <input type="text" name="hemoglobin" placeholder="Enter value">
+                <span class="note">gm/dl (12-14 Male, 10-12 Female)</span>
+            </div>
         </div>
 
         <div class="form-group">
@@ -310,6 +328,30 @@ include __DIR__ . '/includes/header.php';
 
     .form-group.full-width h4 {
         grid-column: 1 / -1;
+    }
+
+    .input-with-note {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .input-with-note input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    .input-with-note .note {
+        min-width: 150px;
+        color: #666;
+        font-size: 13px;
+        background: #f9fafb;
+        padding: 8px 12px;
+        border-radius: 4px;
+        white-space: nowrap;
     }
 
     .action-btn {
